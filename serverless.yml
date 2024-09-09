@@ -1,0 +1,61 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: ligersmile
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: aws-gruppexamination
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  profile: andrea-axelsson
+  region: eu-north-1
+  iam:
+    role: arn:aws:iam::692859904232:role/service-role/test-lambda
+
+package:
+  individually: true
+
+functions:
+  getAllRooms:
+    handler: functions/getAllRooms/index.handler
+    events:
+      - httpApi:
+          path: "/api/rooms"
+          method: GET
+  getAllBookings:
+    handler: functions/getAllBookings/index.handler
+    events:
+      - httpApi:
+          path: "/api/bookings"
+          method: GET
+  postNewRoom:
+    handler: functions/postNewRoom/index.handler
+    events:
+      - httpApi:
+          path: "/api/rooms"
+          method: POST
+
+resources:
+  Resources:
+    roomsDb:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: rooms-db
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    bookingsDb:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: bookings-db
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
