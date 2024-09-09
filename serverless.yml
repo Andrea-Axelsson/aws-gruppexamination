@@ -1,15 +1,24 @@
 # "org" ensures this Service is used with the correct Serverless Framework Access Key.
-org: ligersmile
+org:
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: aws-gruppexamination
 
 provider:
   name: aws
   runtime: nodejs20.x
-  profile: andrea-axelsson
   region: eu-north-1
   iam:
-    role: arn:aws:iam::692859904232:role/service-role/test-lambda
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+            - dynamodb:DeleteItem
+            - dynamodb:UpdateItem
+          Resource: "*"
 
 package:
   individually: true
