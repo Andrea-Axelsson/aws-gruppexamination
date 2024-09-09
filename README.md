@@ -14,15 +14,13 @@ body:
 {
 "type": "double",
 "max_guests": 2,
-"price_per_night": 1000,
-"quantity": 7
+"price_per_night": 1000
 }
 
 {
 "type": "suite",
 "max_guests": 3,
-"price_per_night": 1500,
-"quantity": 6
+"price_per_night": 1500
 }
 
 GET all rooms:
