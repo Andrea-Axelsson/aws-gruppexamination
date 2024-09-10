@@ -1,27 +1,26 @@
-GET all bookings:
-https://aedhfn90fe.execute-api.eu-north-1.amazonaws.com/api/bookings
+URL Endpoints
 
-POST new room:
-https://aedhfn90fe.execute-api.eu-north-1.amazonaws.com/api/rooms
+POST - https://aedhfn90fe.execute-api.eu-north-1.amazonaws.com/api/bookRoom
 
-body:
-{
-"type": "single",
-"max_guests": 1,
-"price_per_night": 500
-}
+<!-- Hämta alla bokningar  -->
 
-{
-"type": "double",
-"max_guests": 2,
-"price_per_night": 1000
-}
+GET - https://aedhfn90fe.execute-api.eu-north-1.amazonaws.com/api/bookings
+
+<!-- Uppdatera Bokning -->
+
+PUT - https://aedhfn90fe.execute-api.eu-north-1.amazonaws.com/api/booking/{id}
+
+Lägg till id från vald bokning som path parameter det sista i url'en.
+
+I body:
 
 {
-"type": "suite",
-"max_guests": 3,
-"price_per_night": 1500
+"numberOfGuests": 4,
+"doubleRoom": 2,
+"checkOutDate": 20240508,
+"suite": 0,
+"singleRoom": 0,
+"checkInDate": 20240504
 }
 
-GET all rooms:
-https://aedhfn90fe.execute-api.eu-north-1.amazonaws.com/api/rooms
+<!-- Radera Bokning -->
