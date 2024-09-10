@@ -36,6 +36,12 @@ functions:
       - httpApi:
           path: "/api/bookings"
           method: GET
+  deleteBooking:
+    handler: functions/deleteBooking/index.handler
+    events:
+      - httpApi:
+          path: "/api/bookings/{id}"
+          method: DELETE
   postNewRoom:
     handler: functions/postNewRoom/index.handler
     events:
@@ -48,6 +54,12 @@ functions:
       - httpApi:
           path: "/api/bookRoom"
           method: POST
+  updateBooking:
+    handler: functions/updateBooking/index.handler
+    events:
+      - httpApi:
+          path: "/api/booking/{id}"
+          method: PUT
 
 resources:
   Resources:
