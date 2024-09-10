@@ -36,12 +36,19 @@ functions:
       - httpApi:
           path: "/api/bookings"
           method: GET
+  deleteBooking:
+    handler: functions/deleteBooking/index.handler
+    events:
+      - httpApi:
+          path: "/api/bookings/{id}"
+          method: DELETE
   postNewRoom:
     handler: functions/postNewRoom/index.handler
     events:
       - httpApi:
           path: "/api/rooms"
           method: POST
+  
 
 resources:
   Resources:
