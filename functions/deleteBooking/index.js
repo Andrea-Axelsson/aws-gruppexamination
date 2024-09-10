@@ -18,15 +18,13 @@ export async function handler(event, context) {
        }).promise();
 
        // Om bokningen inte hittades ska en 404 returneras
-       if(!result.Attributes) {
+       if(!result.Attributes === undefined) {
               return sendError(404, { success: false, message: 'Booking not found' });
        }
 
-        console.log({message: 'Booking successfully removed', result});
-        return sendResponse(200, { success: true });
+        return sendResponse(200, { success: true, message: 'Booking successfully removed' });
 
         } catch (error) {
-            console.error('Error:', error);
             return sendError(500, { success: false, message: 'Could not delete booking' }); 
     }
 };
