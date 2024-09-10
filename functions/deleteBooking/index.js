@@ -4,12 +4,12 @@ import { db } from '../../services/db.js';
 export async function handler(event, context) {
     try {
 
-        // Kontrollera att det finns en bokning med det angivna id:t
+        // Control if the booking id is missing in the request
         if(!event.pathParameters || !event.pathParameters.id) {
             return sendError(400,  { success: false, message: 'Missing booking id' });
         }
 
-        // Ta bort bokningen från databasen
+        // Remove the booking from the database
        const result = await db.delete({
         TableName: 'bookings-db',
         Key: {
@@ -17,13 +17,13 @@ export async function handler(event, context) {
         }
        }).promise();
 
-       // Om bokningen inte hittades ska en 404 returneras
+       // If the booking is not found, return an error
        if(!result.Attributes === undefined) {
               return sendError(404, { success: false, message: 'Booking not found' });
        }
-
-        return sendResponse(200, { success: true, message: 'Booking successfully removed' });
-
+        
+       return sendResponse(200, { success: true, message: 'Booking successfully removed' });
+       
         } catch (error) {
             return sendError(500, { success: false, message: 'Could not delete booking' }); 
     }
