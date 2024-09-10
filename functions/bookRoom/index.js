@@ -117,7 +117,9 @@ export async function handler(event, context) {
         Item: {
           id: id,
           numberOfGuests: numberOfGuests,
-          roomTypes: selectedRooms,
+          singleRoom: singleRoom,
+          doubleRoom: doubleRoom,
+          suite: suite,
           checkInDate: checkInDate,
           checkOutDate: checkOutDate,
           name: fullName,
