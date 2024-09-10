@@ -48,7 +48,18 @@ functions:
       - httpApi:
           path: "/api/rooms"
           method: POST
-  
+  bookRoom:
+    handler: functions/bookRoom/index.handler
+    events:
+      - httpApi:
+          path: "/api/bookRoom"
+          method: POST
+  updateBooking:
+    handler: functions/updateBooking/index.handler
+    events:
+      - httpApi:
+          path: "/api/booking/{id}"
+          method: PUT
 
 resources:
   Resources:
