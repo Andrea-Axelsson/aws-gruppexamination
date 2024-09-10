@@ -24,12 +24,6 @@ package:
   individually: true
 
 functions:
-  getAllRooms:
-    handler: functions/getAllRooms/index.handler
-    events:
-      - httpApi:
-          path: "/api/rooms"
-          method: GET
   getAllBookings:
     handler: functions/getAllBookings/index.handler
     events:
@@ -40,14 +34,8 @@ functions:
     handler: functions/deleteBooking/index.handler
     events:
       - httpApi:
-          path: "/api/bookings/{id}"
+          path: "/api/booking/{id}"
           method: DELETE
-  postNewRoom:
-    handler: functions/postNewRoom/index.handler
-    events:
-      - httpApi:
-          path: "/api/rooms"
-          method: POST
   bookRoom:
     handler: functions/bookRoom/index.handler
     events:
@@ -63,18 +51,6 @@ functions:
 
 resources:
   Resources:
-    roomsDb:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: rooms-db
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-        BillingMode: PAY_PER_REQUEST
-
     bookingsDb:
       Type: AWS::DynamoDB::Table
       Properties:

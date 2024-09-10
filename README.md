@@ -1,18 +1,32 @@
 URL Endpoints
 
-POST - https://aedhfn90fe.execute-api.eu-north-1.amazonaws.com/api/bookRoom
-
-<!-- Hämta alla bokningar  -->
+<!-- Get all bookings  -->
 
 GET - https://aedhfn90fe.execute-api.eu-north-1.amazonaws.com/api/bookings
 
-<!-- Uppdatera Bokning -->
+<!-- Create new booking  -->
+
+POST - https://aedhfn90fe.execute-api.eu-north-1.amazonaws.com/api/bookRoom
+
+In body
+{
+"numberOfGuests": 1,
+"doubleRoom": 1,
+"checkOutDate": 20240508,
+"suite": 1,
+"singleRoom": 1,
+"fullName": "Andrea",
+"email": "Adrea.gmail",
+"checkInDate": 20240504
+}
+
+<!-- Update booking -->
 
 PUT - https://aedhfn90fe.execute-api.eu-north-1.amazonaws.com/api/booking/{id}
 
-Lägg till id från vald bokning som path parameter det sista i url'en.
+Add the ID from the selected booking as a path parameter at the end of the URL.
 
-I body:
+In body:
 
 {
 "numberOfGuests": 4,
@@ -23,4 +37,8 @@ I body:
 "checkInDate": 20240504
 }
 
-<!-- Radera Bokning -->
+<!-- Delete booking -->
+
+DELETE - https://aedhfn90fe.execute-api.eu-north-1.amazonaws.com/api/booking/{id}
+
+Add the ID from the selected booking as a path parameter at the end of the URL.
