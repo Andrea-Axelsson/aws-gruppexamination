@@ -4,11 +4,12 @@ import { db } from '../../services/db.js';
 export async function handler(event, context) {
     try {
 
-        // Kontrollera att boknings-ID:t finns
+        // Control that the booking id is provided
         if(!event.pathParameters || !event.pathParameters.id) {
             return sendError(400,  { success: false, message: 'Missing booking id' });
         }
 
+        // Get the booking id
         const bookingId = event.pathParameters.id;
 
         const getBooking = await db.get({
@@ -18,12 +19,12 @@ export async function handler(event, context) {
             }
         }).promise();
 
-        // Kontrollera att bokningen finns
+        // Control that the booking exists
         if(!getBooking.Item) {
             return sendError(404, { success: false, message: 'Booking not found' });
         }
 
-        // Ta bort bokningen från databasen
+        // Remove the booking
        await db.delete({
         TableName: 'bookings-db',
         Key: {
