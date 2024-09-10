@@ -23,14 +23,14 @@ export async function handler(event, context) {
   } = JSON.parse(event.body);
 
   try {
-    // Vänta på att nanoid blir tillgängligt
+    // Wait for nanoid to be available if not already
     if (!nanoid) {
       await import("nanoid").then((module) => {
         nanoid = module.nanoid;
       });
     }
 
-    // Lista över obligatoriska fält
+    // List of required fields
     const requiredFields = {
       numberOfGuests,
       checkInDate,
@@ -39,12 +39,12 @@ export async function handler(event, context) {
       email,
     };
 
-    // Kontrollera att alla obligatoriska fält finns
+    // Check if any required fields are missing
     const missingFields = Object.entries(requiredFields)
       .filter(([key, value]) => !value)
       .map(([key]) => key);
 
-    // Om fält saknas, skicka ett felmeddelande
+    // If missing fields, send an error response
     if (missingFields.length > 0) {
       return sendError(400, {
         success: false,
@@ -52,13 +52,14 @@ export async function handler(event, context) {
       });
     }
 
-    // Beräkna antal nätter
+    // Calculate number of nights
     const checkIn = new Date(checkInDate);
     const checkOut = new Date(checkOutDate);
     const numberOfNights = Math.ceil(
-      (checkOut - checkIn) / (1000 * 60 * 60 * 24)
+      (checkOut - checkIn) / (1000 * 60 * 60 * 24) // Convert milliseconds to days
     );
 
+    // Validate check-in and check-out dates
     if (numberOfNights <= 0) {
       return sendError(400, {
         success: false,
@@ -66,26 +67,27 @@ export async function handler(event, context) {
       });
     }
 
-    // Kapaciteter för olika rumstyper
+    // Room capacities for different types
     const roomCapacities = {
       singleRoom: 1,
       doubleRoom: 2,
       suite: 3,
     };
 
-    // Skapa en lista över begärda rum
+    // Create a list of requested rooms
     const selectedRooms = [
       { type: "singleRoom", requested: singleRoom || 0 },
       { type: "doubleRoom", requested: doubleRoom || 0 },
       { type: "suite", requested: suite || 0 },
     ];
 
-    // Kontrollera att antalet gäster matchar rumskapaciteten
+    // Check if total capacity meets the requested number of guests
     const totalCapacity = selectedRooms.reduce(
       (acc, room) => acc + (roomCapacities[room.type] || 0) * room.requested,
       0
     );
 
+    // If tinsifficient capacity, send an error response
     if (totalCapacity < numberOfGuests) {
       return sendError(400, {
         success: false,
@@ -93,7 +95,7 @@ export async function handler(event, context) {
       });
     }
 
-    // Beräkna totalsumma
+    // Calculate total amount for the booking
     const totalAmount = selectedRooms.reduce((acc, room) => {
       const pricePerNight = {
         singleRoom: 500,
@@ -105,10 +107,10 @@ export async function handler(event, context) {
       );
     }, 0);
 
-    // Skapa boknings-id
+    // Generate boknings ID
     const id = nanoid();
 
-    // Skapa bokning i 'bookings-db'
+    // Save booking to the 'bookings-db' table
     await db
       .put({
         TableName: "bookings-db",
@@ -126,12 +128,14 @@ export async function handler(event, context) {
       })
       .promise();
 
-    // Svara med bokningsinformation och bekräftelse
+    // Return booking information and confirmation response
     return sendResponse(200, {
       success: true,
       bookingId: id,
       numberOfGuests: numberOfGuests,
-      roomTypes: selectedRooms,
+      singleRoom: singleRoom,
+      doubleRoom: doubleRoom,
+      suite: suite,
       checkInDate: checkInDate,
       checkOutDate: checkOutDate,
       name: fullName,
