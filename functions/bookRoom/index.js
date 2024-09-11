@@ -93,6 +93,53 @@ export async function handler(event, context) {
       });
     }
 
+    /* MAX BOOKING OF ROOM */
+
+     // Fetch current bookings from DynamoDB
+     const currentBookings = await db
+     .scan({
+       TableName: "bookings-db",
+     })
+     .promise();
+
+   // Calculate the total number of rooms already booked
+   const totalBookedRooms = currentBookings.Items.reduce(
+     (acc, booking) => {
+       return {
+         singleRoom: acc.singleRoom + (booking.singleRoom || 0),
+         doubleRoom: acc.doubleRoom + (booking.doubleRoom || 0),
+         suite: acc.suite + (booking.suite || 0),
+       };
+     },
+     { singleRoom: 0, doubleRoom: 0, suite: 0 }
+   );
+
+   // Calculate total rooms requested in the new booking
+   const newBookingRooms = {
+     singleRoom: singleRoom || 0,
+     doubleRoom: doubleRoom || 0,
+     suite: suite || 0,
+   };
+
+   // Check if adding the new booking would exceed room limits
+   const maxRoomsAvailable = 20;
+   const totalRoomsRequested = Object.values(newBookingRooms).reduce(
+     (acc, num) => acc + num,
+     0
+   );
+
+   const totalRoomsAfterBooking = totalRoomsRequested + Object.values(totalBookedRooms).reduce((acc, num) => acc + num, 0);
+
+   if (totalRoomsAfterBooking > maxRoomsAvailable) {
+     return sendError(400, {
+       success: false,
+       message: `Exceeded the total number of available rooms. Only ${maxRoomsAvailable - Object.values(totalBookedRooms).reduce((acc, num) => acc + num, 0)} rooms left.`,
+     });
+   }
+
+   /* MAX BOOKING OF ROOM */
+
+
     // Beräkna totalsumma
     const totalAmount = selectedRooms.reduce((acc, room) => {
       const pricePerNight = {
