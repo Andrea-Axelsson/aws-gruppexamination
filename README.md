@@ -1,3 +1,9 @@
+GRUPP POOP SHERIFFS 💩🤠
+
+Sofia Rosborg
+Linnea Sjöholm
+Andrea Axelsson
+
 URL Endpoints
 
 <!-- Get all bookings  -->
