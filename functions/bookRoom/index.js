@@ -11,6 +11,47 @@ import("nanoid")
   });
 
 export async function handler(event, context) {
+
+  const allowedFields = [
+    "numberOfGuests",
+    "doubleRoom",
+    "singleRoom",
+    "suite",
+    "checkInDate",
+    "checkOutDate",
+    "fullName",
+    "email",
+  ];
+
+  // Check if the request body is valid JSON
+  let requestBody;
+  try {
+    requestBody = JSON.parse(event.body);
+  } catch (error) {
+    return sendError(400, {
+      success: false,
+      message: "Invalid request body",
+    });
+  }
+
+  // Filter out any extra fields that are not allowed
+  const filteredBody = Object.keys(requestBody)
+  .filter((key) => allowedFields.includes(key))
+  .reduce((obj, key) => {
+    obj[key] = requestBody[key];
+    return obj;
+  }, {}); 
+
+  // Check if any extra fields are present
+  const extraFields = Object.keys(requestBody)
+  .filter(key => !allowedFields.includes(key));
+  if(extraFields.length > 0) {
+    return sendError(400, {
+      success: false,
+      message: `Invalid fields: ${extraFields.join(", ")}`,
+    });
+  }
+
   const {
     numberOfGuests,
     doubleRoom,
@@ -20,7 +61,7 @@ export async function handler(event, context) {
     checkOutDate,
     fullName,
     email,
-  } = JSON.parse(event.body);
+  } = filteredBody;
 
   try {
     // Wait for nanoid to be available if not already
