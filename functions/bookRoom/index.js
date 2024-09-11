@@ -34,6 +34,7 @@ const validateDateFormat = (yyyymmdd) => {
   );
 };
 
+
 export async function handler(event, context) {
 
   const allowedFields = [
@@ -126,6 +127,18 @@ export async function handler(event, context) {
       parseInt(checkOutDate.toString().slice(4, 6)) - 1, // Months are 0-indexed
       parseInt(checkOutDate.toString().slice(6, 8))
     );
+
+    // Set hours, minutes, seconds and milliseconds to 0 for both dates
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Check if check-in and check-out dates are in the future
+    if(checkIn <= today || checkOut <= today) {
+      return sendError(400, {
+        success: false,
+        message: "Check-in and check-out dates must be in the future",
+      });
+    };
 
     // List of required fields
     const requiredFields = {
