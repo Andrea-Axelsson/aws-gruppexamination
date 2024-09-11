@@ -10,6 +10,30 @@ import("nanoid")
     console.error("Failed to load nanoid:", err);
   });
 
+// Validate if date is in yyyymmdd format and if date is valid
+const validateDateFormat = (yyyymmdd) => {
+  const datePattern = /^\d{4}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])$/;
+
+  // Check if date matches format
+  if (!datePattern.test(yyyymmdd)) {
+    return false;
+  }
+
+  // Parse year, month and day from the string
+  const year = parseInt(yyyymmdd.slice(0, 4), 10);
+  const month = parseInt(yyyymmdd.slice(4, 6), 10) - 1; // Months are 0-indexed
+  const day = parseInt(yyyymmdd.slice(6, 8), 10);
+
+  const date = new Date(year, month, day);
+
+  // Check if date is valid
+  return (
+    date.getFullYear() === year &&
+    date.getMonth() === month &&
+    date.getDate() === day
+  );
+};
+
 export async function handler(event, context) {
   const {
     numberOfGuests,
@@ -30,6 +54,38 @@ export async function handler(event, context) {
       });
     }
 
+    // Validate check-in date format
+    if (!validateDateFormat(checkInDate.toString())) {
+      return sendError(400, {
+        success: false,
+        message:
+          "Invalid check-in date format. Date must be in yyyymmdd format.",
+      });
+    }
+
+    // Validate check-in and check-out date format
+    if (!validateDateFormat(checkOutDate.toString())) {
+      return sendError(400, {
+        success: false,
+        message:
+          "Invalid check-out date format. Date must be in yyyymmdd format.",
+      });
+    }
+
+    // Convert check-in date from string to Date object
+    const checkIn = new Date(
+      parseInt(checkInDate.toString().slice(0, 4)),
+      parseInt(checkInDate.toString().slice(4, 6)) - 1, // Months are 0-indexed
+      parseInt(checkInDate.toString().slice(6, 8))
+    );
+
+    // Convert check-out date from string to Date object
+    const checkOut = new Date(
+      parseInt(checkOutDate.toString().slice(0, 4)),
+      parseInt(checkOutDate.toString().slice(4, 6)) - 1, // Months are 0-indexed
+      parseInt(checkOutDate.toString().slice(6, 8))
+    );
+
     // List of required fields
     const requiredFields = {
       numberOfGuests,
@@ -44,7 +100,7 @@ export async function handler(event, context) {
       .filter(([key, value]) => !value)
       .map(([key]) => key);
 
-    // If missing fields, send an error response
+    // If there are missing fields, send an error response
     if (missingFields.length > 0) {
       return sendError(400, {
         success: false,
@@ -52,14 +108,12 @@ export async function handler(event, context) {
       });
     }
 
-    // Calculate number of nights
-    const checkIn = new Date(checkInDate);
-    const checkOut = new Date(checkOutDate);
+    // Calculate number of nights between check-in and check-out
     const numberOfNights = Math.ceil(
       (checkOut - checkIn) / (1000 * 60 * 60 * 24) // Convert milliseconds to days
     );
 
-    // Validate check-in and check-out dates
+    // Ensure the number of nights is positive (valid check-in/check-out)
     if (numberOfNights <= 0) {
       return sendError(400, {
         success: false,
@@ -67,14 +121,14 @@ export async function handler(event, context) {
       });
     }
 
-    // Room capacities for different types
+    // Room capacities for different room types
     const roomCapacities = {
       singleRoom: 1,
       doubleRoom: 2,
       suite: 3,
     };
 
-    // Create a list of requested rooms
+    // List of requested rooms and their types
     const selectedRooms = [
       { type: "singleRoom", requested: singleRoom || 0 },
       { type: "doubleRoom", requested: doubleRoom || 0 },
@@ -87,7 +141,7 @@ export async function handler(event, context) {
       0
     );
 
-    // If tinsifficient capacity, send an error response
+    // If total capacity is insufficient, send an error response
     if (totalCapacity < numberOfGuests) {
       return sendError(400, {
         success: false,
@@ -107,7 +161,7 @@ export async function handler(event, context) {
       );
     }, 0);
 
-    // Generate boknings ID
+    // Generate booking ID
     const id = nanoid();
 
     // Save booking to the 'bookings-db' table
