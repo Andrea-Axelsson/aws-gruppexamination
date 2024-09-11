@@ -1,27 +1,44 @@
-GET all bookings:
-https://aedhfn90fe.execute-api.eu-north-1.amazonaws.com/api/bookings
+URL Endpoints
 
-POST new room:
-https://aedhfn90fe.execute-api.eu-north-1.amazonaws.com/api/rooms
+<!-- Get all bookings  -->
 
-body:
+GET - https://aedhfn90fe.execute-api.eu-north-1.amazonaws.com/api/bookings
+
+<!-- Create new booking  -->
+
+POST - https://aedhfn90fe.execute-api.eu-north-1.amazonaws.com/api/bookRoom
+
+In body
 {
-"type": "single",
-"max_guests": 1,
-"price_per_night": 500
+"numberOfGuests": 1,
+"doubleRoom": 1,
+"checkOutDate": 20240508,
+"suite": 1,
+"singleRoom": 1,
+"fullName": "Andrea",
+"email": "Adrea.gmail",
+"checkInDate": 20240504
 }
 
-{
-"type": "double",
-"max_guests": 2,
-"price_per_night": 1000
-}
+<!-- Update booking -->
+
+PUT - https://aedhfn90fe.execute-api.eu-north-1.amazonaws.com/api/booking/{id}
+
+Add the ID from the selected booking as a path parameter at the end of the URL.
+
+In body:
 
 {
-"type": "suite",
-"max_guests": 3,
-"price_per_night": 1500
+"numberOfGuests": 4,
+"doubleRoom": 2,
+"checkOutDate": 20240508,
+"suite": 0,
+"singleRoom": 0,
+"checkInDate": 20240504
 }
 
-GET all rooms:
-https://aedhfn90fe.execute-api.eu-north-1.amazonaws.com/api/rooms
+<!-- Delete booking -->
+
+DELETE - https://aedhfn90fe.execute-api.eu-north-1.amazonaws.com/api/booking/{id}
+
+Add the ID from the selected booking as a path parameter at the end of the URL.
