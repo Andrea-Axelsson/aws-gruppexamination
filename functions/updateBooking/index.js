@@ -2,8 +2,45 @@ import { sendResponse, sendError } from '../../responses/index.js';
 import { db } from '../../services/db.js';
 
 export async function handler(event, context) {
+
+    const allowedFields = [
+        "numberOfGuests",
+        "doubleRoom",
+        "singleRoom",
+        "suite",
+        "checkInDate",
+        "checkOutDate"
+    ];
+
+    let requestBody;
+    try {
+        requestBody = JSON.parse(event.body);
+    } catch (error) {
+        return sendError(400, {
+            success: false,
+            message: "Invalid request body",
+        });
+    }
+
+    const filteredBody = Object.keys(requestBody)
+        .filter((key) => allowedFields.includes(key))
+        .reduce((obj, key) => {
+            obj[key] = requestBody[key];
+            return obj;
+        }, {});
+
+        const extraFields = Object.keys(requestBody)
+        .filter(key => !allowedFields.includes(key));
+    if (extraFields.length > 0) {
+        return sendError(400, {
+            success: false,
+            message: `Invalid fields: ${extraFields.join(", ")}`,
+        });
+    }
+
+
     const { id } = event.pathParameters;
-    const { numberOfGuests, doubleRoom, checkOutDate, suite, singleRoom, checkInDate } = JSON.parse(event.body);
+    const { numberOfGuests, doubleRoom, checkOutDate, suite, singleRoom, checkInDate } = filteredBody;
 
     const maxGuestsSingleRoom = 1;
     const maxGuestsDoubleRoom = 2;
