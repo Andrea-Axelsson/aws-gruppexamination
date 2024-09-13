@@ -155,12 +155,27 @@ export async function handler(event, context) {
       });
     }
 
+    // Prices per room type
+    const pricePerNight = {
+      singleRoom: 500,
+      doubleRoom: 1000,
+      suite: 1500,
+    };
+
+    // Calculate new total amount for the booking
+    const totalAmount = Object.values(newBookingRooms).reduce(
+      (acc, num, index) => {
+        return acc + num * pricePerNight[Object.keys(newBookingRooms)[index]];
+      },
+      0
+    );
+
     const result = await db
       .update({
         TableName: "bookings-db",
         Key: { id: id },
         UpdateExpression:
-          "set numberOfGuests = :g, doubleRoom = :d, checkOutDate = :co, suite = :s, singleRoom = :sr, checkInDate = :ci",
+          "set numberOfGuests = :g, doubleRoom = :d, checkOutDate = :co, suite = :s, singleRoom = :sr, checkInDate = :ci, totalAmount = :ta",
         ExpressionAttributeValues: {
           ":g": numberOfGuests,
           ":d": doubleRoom,
@@ -168,6 +183,7 @@ export async function handler(event, context) {
           ":s": suite,
           ":sr": singleRoom,
           ":ci": checkInDate,
+          ":ta": totalAmount,
         },
         ReturnValues: "UPDATED_NEW",
       })
