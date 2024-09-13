@@ -34,9 +34,7 @@ const validateDateFormat = (yyyymmdd) => {
   );
 };
 
-
 export async function handler(event, context) {
-
   const allowedFields = [
     "numberOfGuests",
     "doubleRoom",
@@ -61,16 +59,17 @@ export async function handler(event, context) {
 
   // Filter out any extra fields that are not allowed
   const filteredBody = Object.keys(requestBody)
-  .filter((key) => allowedFields.includes(key))
-  .reduce((obj, key) => {
-    obj[key] = requestBody[key];
-    return obj;
-  }, {}); 
+    .filter((key) => allowedFields.includes(key))
+    .reduce((obj, key) => {
+      obj[key] = requestBody[key];
+      return obj;
+    }, {});
 
   // Check if any extra fields are present
-  const extraFields = Object.keys(requestBody)
-  .filter(key => !allowedFields.includes(key));
-  if(extraFields.length > 0) {
+  const extraFields = Object.keys(requestBody).filter(
+    (key) => !allowedFields.includes(key)
+  );
+  if (extraFields.length > 0) {
     return sendError(400, {
       success: false,
       message: `Invalid fields: ${extraFields.join(", ")}`,
@@ -87,6 +86,39 @@ export async function handler(event, context) {
     fullName,
     email,
   } = filteredBody;
+
+  const requiredFields = [
+    "numberOfGuests",
+    "checkInDate",
+    "checkOutDate",
+    "fullName",
+    "email",
+  ];
+
+  // Check for missing required fields (allowing 0 as a valid value for certain fields)
+  const missingFields = requiredFields.filter(
+    (field) => filteredBody[field] === undefined || filteredBody[field] === null
+  );
+
+  if (missingFields.length > 0) {
+    return sendError(400, {
+      success: false,
+      message: `Missing required fields: ${missingFields.join(", ")}`,
+    });
+  }
+
+  // Validate room fields explicitly to allow 0
+  const roomFields = ["suite", "doubleRoom", "singleRoom"];
+  const invalidRoomFields = roomFields.filter(
+    (field) => filteredBody[field] === undefined || filteredBody[field] === null
+  );
+
+  if (invalidRoomFields.length > 0) {
+    return sendError(400, {
+      success: false,
+      message: `Missing required room fields: ${invalidRoomFields.join(", ")}`,
+    });
+  }
 
   try {
     // Wait for nanoid to be available if not already
@@ -133,32 +165,10 @@ export async function handler(event, context) {
     today.setHours(0, 0, 0, 0);
 
     // Check if check-in and check-out dates are in the future
-    if(checkIn <= today || checkOut <= today) {
+    if (checkIn <= today || checkOut <= today) {
       return sendError(400, {
         success: false,
         message: "Check-in and check-out dates must be in the future",
-      });
-    };
-
-    // List of required fields
-    const requiredFields = {
-      numberOfGuests,
-      checkInDate,
-      checkOutDate,
-      fullName,
-      email,
-    };
-
-    // Check if any required fields are missing
-    const missingFields = Object.entries(requiredFields)
-      .filter(([key, value]) => !value)
-      .map(([key]) => key);
-
-    // If there are missing fields, send an error response
-    if (missingFields.length > 0) {
-      return sendError(400, {
-        success: false,
-        message: `Missing required fields: ${missingFields.join(", ")}`,
       });
     }
 
@@ -236,12 +246,17 @@ export async function handler(event, context) {
       0
     );
 
-    const totalRoomsAfterBooking = totalRoomsRequested + Object.values(totalBookedRooms).reduce((acc, num) => acc + num, 0);
+    const totalRoomsAfterBooking =
+      totalRoomsRequested +
+      Object.values(totalBookedRooms).reduce((acc, num) => acc + num, 0);
 
     if (totalRoomsAfterBooking > maxRoomsAvailable) {
       return sendError(400, {
         success: false,
-        message: `Exceeded the total number of available rooms. Only ${maxRoomsAvailable - Object.values(totalBookedRooms).reduce((acc, num) => acc + num, 0)} rooms left.`,
+        message: `Exceeded the total number of available rooms. Only ${
+          maxRoomsAvailable -
+          Object.values(totalBookedRooms).reduce((acc, num) => acc + num, 0)
+        } rooms left.`,
       });
     }
 
